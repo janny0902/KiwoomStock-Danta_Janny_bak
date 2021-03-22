@@ -2,3 +2,11 @@ __pycache__/Config.cpython-39.pyc
 __pycache__/KiwoomAPI.cpython-39.pyc
 __pycache__/MathAPI.cpython-39.pyc
 __pycache__/Sqlite3Conn.cpython-39.pyc
+__pycache__/tr_receive_handler.cpython-39.pyc
+.venv/pyvenv.cfg
+.venv/
+
+**/venv/
+TA_Lib-0.4.19-cp39-cp39-win32.whl
+
+
