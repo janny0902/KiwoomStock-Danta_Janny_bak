@@ -7,6 +7,7 @@ import win32con
 import win32api
 import Sqlite3Conn
 
+
 TR_REQ_TIME_INTERVAL = 0.3
 
 class KiwoomAPI(QAxWidget):

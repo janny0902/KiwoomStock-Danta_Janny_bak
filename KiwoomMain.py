@@ -15,12 +15,8 @@ import pandas as pd
 class KiwoonMain:
     def __init__(self):
         self.kiwoom = KiwoomAPI.KiwoomAPI()
-        #self.kiwoom.CommConnect()
-        
-        self.mathsub = MathAPI.MathAPI()             
-      
-
-        
+        #self.kiwoom.CommConnect()        
+        self.mathsub = MathAPI.MathAPI()                    
         self.kiwoom.comm_connect()  ##자동로그인 
 
 # ========== #
@@ -51,7 +47,7 @@ class KiwoonMain:
       
     def myAccountSh(self): ## 계좌 조회
         #TODO 3. (좌니) 잔고조회 (현재 잔고 조회해서 보유종목및 수익률 확인 ) (완료)        
-	
+        self.kiwoom.output_list = output_list['OPW00018']  
         self.kiwoom.SetInputValue("계좌번호"	,  self.kiwoom.accNum)
         self.kiwoom.SetInputValue("비밀번호"	,   self.kiwoom.passAcc)
           
@@ -108,23 +104,23 @@ class KiwoonMain:
         ##시장구분 = 000:전체, 001:코스피, 101:코스닥
         ##관리종목포함 = 0:관리종목 미포함, 1:관리종목 포함
         ##정렬구분 = 1:거래량, 2:거래회전율, 3:거래대금
-	
+        self.kiwoom.output_list = output_list['OPT10030']        
         self.kiwoom.SetInputValue("시장구분"	,  '000')
         self.kiwoom.SetInputValue("정렬구분"	,  "1")
-        self.kiwoom.SetInputValue("관리종목포함"	,   '14')
-        self.kiwoom.wait_secs("계좌입력 시도", 1)
+        self.kiwoom.SetInputValue("관리종목포함"	,   '14')        
         self.kiwoom.CommRqData( "RQName"    ,  "OPT10030"	,  "0"	,  "0101")
         
+        
         result_Toplist =  self.kiwoom.ret_data['OPT10030']    
-        print(result_Toplist['Data'][0]['종목명'].lstrip())
-        print(result_Toplist['Data'][1]['종목명'].lstrip())
-        print(result_Toplist['Data'][2]['종목명'].lstrip())
-
+        print(result_Toplist['Data'][0])   #1위
+        print(result_Toplist['Data'][1])   #2위
+        print(result_Toplist['Data'])
         print("---------------------")
         
         #OPT10032 거래대금 상위 요청
 
         print("test1")
+        self.kiwoom.output_list = output_list['OPT10065'] 
         #OPT10065 장중투자자별 매매상위요청
         #매매구분 = 1:순매수, 2:순매도
         self.kiwoom.SetInputValue("매매구분","1")
@@ -142,14 +138,15 @@ class KiwoonMain:
         #opt90003  프로그램순매수 상위50 요청           
         #매매상위구분 = 1:순매도상위, 2:순매수상위
         print('test2')
+        self.kiwoom.output_list = output_list['OPT90003'] 
         self.kiwoom.SetInputValue("매매상위구분"	,  "2")
         #금액수량구분 = 1:금액, 2:수량
         self.kiwoom.SetInputValue("금액수량구분"	,  "1")
         #시장구분 = P00101:코스피, P10102:코스닥
         self.kiwoom.SetInputValue("시장구분"	,  "P00101")
         
-        self.kiwoom.CommRqData( "RQName2"    ,  "opt90003"	,  "0"	,  "0101")
-        result_Program_1 =  self.kiwoom.ret_data['opt90003']
+        self.kiwoom.CommRqData( "RQName2"    ,  "OPT90003"	,  "0"	,  "0101")
+        result_Program_1 =  self.kiwoom.ret_data['OPT90003']
 
         self.kiwoom.SetInputValue("매매상위구분"	,  "2")
         #금액수량구분 = 1:금액, 2:수량
@@ -157,8 +154,8 @@ class KiwoonMain:
         #시장구분 = P00101:코스피, P10102:코스닥
         self.kiwoom.SetInputValue("시장구분"	,  "P10102")
         
-        self.kiwoom.CommRqData( "RQName3"    ,  "opt90003"	,  "0"	,  "0101")
-        result_Program_2 =  self.kiwoom.ret_data['opt90003']
+        self.kiwoom.CommRqData( "RQName3"    ,  "OPT90003"	,  "0"	,  "0101")
+        result_Program_2 =  self.kiwoom.ret_data['OPT90003']
 
         print(result_Program_1)
         print(result_Program_2)
@@ -193,12 +190,12 @@ class KiwoonMain:
        
         data = self.mathsub.GetIndicator(df)
         print(data)     ##일봉 데이터
-       
+        self.kiwoom.output_list = output_list['OPT10080'] 
 
         self.kiwoom.SetInputValue("종목코드",  "005930")
         self.kiwoom.SetInputValue("틱범위",   "3")
         self.kiwoom.SetInputValue("수정주가구분	"	,   "1")        
-        self.kiwoom.CommRqData("opt10080_req", "opt10080", 0, "0101")
+        self.kiwoom.CommRqData("opt10080_req", "OPT10080", 0, "0101")
         ohlcv = self.kiwoom.latest_tr_data
 
         
@@ -223,7 +220,8 @@ class KiwoonMain:
         
 
         #TODO 4. (좌니) 다음날 매수 종목 미리 서칭 기능(거래량 , 상승률, 뉴스 등 포함) 
-
+        print(self.kiwoom.ret_data.keys())
+        print(self.kiwoom.ret_data['OPT90003'])
         print("program end")
        
 
