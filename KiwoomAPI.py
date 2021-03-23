@@ -35,8 +35,10 @@ class KiwoomAPI(QAxWidget):
         self.OnReceiveMsg.connect(self.E_OnReceiveMsg)
 
         # 로그인 버전처리
+        self.OnReceiveTrData.connect(self._receive_tr_data) 
         self.OnEventConnect.connect(self.E_OnEventConnect)
         self.OnReceiveTrData.connect(self.E_OnReceiveTrData)
+        
         
 
         
@@ -253,5 +255,48 @@ class KiwoomAPI(QAxWidget):
     def enter_keys(self,hwnd, data):
         win32api.SendMessage(hwnd, win32con.EM_SETSEL, 0, -1) 
         win32api.SendMessage(hwnd, win32con.EM_REPLACESEL, 0, data) 
+
+    def sendOrder(self, sRQName, sScreenNo, sAccNo, nOrderType,sCode,nQty,nPrice,sHogaGb,sOrgOrderNo):
+          #BSTR sRQName, // 사용자 구분명
+          #BSTR sScreenNo, // 화면번호
+          #BSTR sAccNo,  // 계좌번호 10자리
+          #LONG nOrderType,  // 주문유형 1:신규매수, 2:신규매도 3:매수취소, 4:매도취소, 5:매수정정, 6:매도정정
+          #BSTR sCode, // 종목코드
+          #LONG nQty,  // 주문수량
+          #LONG nPrice, // 주문가격  시장가 매수시 03
+          #BSTR sHogaGb,   // 거래구분(혹은 호가구분)은 아래 참고
+          #BSTR sOrgOrderNo  // 원주문번호입니다. 신규주문에는 공백, 정정(취소)주문할 원주문번호를 입력합니다.     
+          # [거래구분]
+          #00 : 지정가
+          #03 : 시장가
+          #05 : 조건부지정가
+          #06 : 최유리지정가
+          #07 : 최우선지정가
+          #10 : 지정가IOC
+          #13 : 시장가IOC
+          #16 : 최유리IOC
+          #20 : 지정가FOK
+          #23 : 시장가FOK
+          #26 : 최유리FOK
+          #61 : 장전시간외종가
+          #62 : 시간외단일가매매
+          #81 : 장후시간외종가
+
+        self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb,sOrgOrderNo])
+        self.tr_event_loop = QEventLoop()
+        self.tr_event_loop.exec_()
         
 
+    def _receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
+        if next == '2':
+            self.remained_data = True
+        else:
+            self.remained_data = False
+
+        if rqname == "opt10081_req":
+            self._opt10081(rqname, trcode)
+
+        try:
+            self.tr_event_loop.exit()
+        except AttributeError:
+            pass
