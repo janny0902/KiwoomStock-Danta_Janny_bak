@@ -177,11 +177,14 @@ class KiwoonMain:
         self.kiwoom.wait_secs("매도", 0.5)
 
         #TODO 2-2-1 (좌니) 키움 종목 매도 기능 - 조건 설정  
-                    # 호가 -1% 이상 넘으면 매도, (손절)(완료)
+                    # 호가 호가단위 3칸 이상 넘으면 매도, (손절)(완료)
+        
         result  = self.myAccountSh()   
         for stock in result['Data']:
             if stock['수익률(%)'][0] =='-':
                 if int(stock['수익률(%)'][-4])>=1:
+                    hoga = self.mathsub.hogadan(stock['현재가'])
+                    print(hoga, '호가')  ##호가 3계단 밑에 갈시 손절!  
                     print(stock['종목명'])
                     print(stock['수익률(%)'])
                     print("-1% 손해시 매도!")

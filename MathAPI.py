@@ -20,6 +20,25 @@ class MathAPI:
         
         return result
 
+        #거래 호가 단위 구하기  
+    def hogadan(self,price):
+        
+        reulst = 0
+        
+        if int(price) <= 999:
+            result = 1
+        elif int(price) <= 4999:
+            result = 5
+        elif int(price) <= 9999:
+            result = 10
+        elif int(price) <= 49999:
+            result = 50
+        elif int(price) <= 99999:
+            reulst = 100
+        else:
+            result = 0
+        return result
+
     def searchMoney(self,buy_money,price):  ##구매수량 구해기
         result = buy_money / price
         return round(result)-1
