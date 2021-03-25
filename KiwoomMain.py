@@ -144,7 +144,7 @@ class KiwoonMain:
         self.kiwoom.CommRqData( "RQName1"    ,  "OPT10065",  "0"	,  "0101")
         result_marketTop =  self.kiwoom.ret_data['OPT10065']
         print(result_marketTop)
-        print("----------------------")
+        print("----------------------") 
         
         
         #opt90003  프로그램순매수 상위50 요청           
@@ -189,7 +189,7 @@ class KiwoonMain:
         self.kiwoom.wait_secs("매도", 0.5)
 
         #TODO 2-2-1 (좌니) 키움 종목 매도 기능 - 조건 설정  
-                    # 호가 호가단위 3칸 이상 넘으면 매도, (손절)(완료)
+                    # 5선 데드크로스 + 호가 호가단위 3칸 이상 넘으면 매도, (손절)(완료)
         
         result  = self.myAccountSh()   
         for stock in result['Data']:
