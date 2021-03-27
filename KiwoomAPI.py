@@ -22,6 +22,7 @@ class KiwoomAPI(QAxWidget):
         user = self.sqlConn.SQL_UserSelect('USER') 
         self.userName = user[1].strip()
         self.accNum = user[2].strip()
+        print( self.accNum)
         self.passId = user[3].strip()
         self.passAcc = user[4].strip()
         self.userId = user[6].strip()
