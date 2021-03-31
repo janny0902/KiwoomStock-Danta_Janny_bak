@@ -237,7 +237,7 @@ class KiwoonMain:
 
 
             #print(data_min.iloc[-1]['date'])   -1은 현재봉 값변화중 
-            print(data_min.iloc[-1]['SMA5'])
+            print(data_min.iloc[-1]['SMA5']) 
             print(data_min.iloc[-1]['close'])
             if int(data_min.iloc[-1]['close']) < int(data_min.iloc[-1]['SMA5']):
                 print("5일선 데드크로스 매도!") 
