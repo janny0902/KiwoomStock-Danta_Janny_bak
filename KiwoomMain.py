@@ -258,8 +258,8 @@ class KiwoonMain:
 
 
         schedule.every(10).seconds.do(job)
-        #15시 15분 종료로 (세현 진행예정)
         schedule.every(25).seconds.do(flagfun)
+        schedule.every().day.at("20:48").do(job)
 
         while self.flag:
             schedule.run_pending()
