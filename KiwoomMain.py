@@ -254,12 +254,12 @@ class KiwoonMain:
             print("program end")
 
         def flagfun():
-                 self.flag= False
+            self.flag= False
 
 
         schedule.every(10).seconds.do(job)
-        #15시 15분 종료로 (세현)
         schedule.every(25).seconds.do(flagfun)
+        schedule.every().day.at("20:48").do(job)
 
         while self.flag:
             schedule.run_pending()
