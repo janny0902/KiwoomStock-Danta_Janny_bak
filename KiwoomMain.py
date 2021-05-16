@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 
 import FinanceDataReader as fdr
+from numpy import spacing
 
 from Config import *
 from PyQt5.QtCore import *
@@ -10,13 +11,16 @@ from PyQt5 import QtTest
 import KiwoomAPI
 import MathAPI
 import pandas as pd
+import talib as ta
+import Sqlite3Conn
 
 
 class KiwoonMain:
     def __init__(self):
         self.kiwoom = KiwoomAPI.KiwoomAPI()
         #self.kiwoom.CommConnect()        
-        self.mathsub = MathAPI.MathAPI()                    
+        self.mathsub = MathAPI.MathAPI()  
+        self.sqlConn = Sqlite3Conn.SQL_CONNECT()  ##DB                  
         self.kiwoom.comm_connect()  ##자동로그인 
 
 # ========== #
@@ -193,13 +197,14 @@ class KiwoonMain:
         
         result  = self.myAccountSh()   
         for stock in result['Data']:
-            if stock['수익률(%)'][0] =='-':
-                if int(stock['수익률(%)'][-4])>=1:
-                    hoga = self.mathsub.hogadan(stock['현재가'])
-                    print(hoga, '호가')  ##호가 4계단 밑에 갈시 손절!  
-                    print(stock['종목명'])
-                    print(stock['수익률(%)'])
-                    print("-1% 손해시 매도!")
+            print(stock)
+            #if stock['수익률(%)'][0] =='-':
+            #    if int(stock['수익률(%)'][-4])>=1:
+            #        hoga = self.mathsub.hogadan(stock['현재가'])
+            #        print(hoga, '호가')  ##호가 4계단 밑에 갈시 손절!  
+            #        print(stock['종목명'])
+            #        print(stock['수익률(%)'])
+            #        print("-1% 손해시 매도!")
 
                     # 5분봉기준 전봉 거래량 기준 60% 이상 하락시 매도, (익절)(좀더 파악)
                     
@@ -214,7 +219,7 @@ class KiwoonMain:
         self.kiwoom.output_list = output_list['OPT10080'] 
 
         self.kiwoom.SetInputValue("종목코드",  "005930")
-        self.kiwoom.SetInputValue("틱범위",   "3")
+        self.kiwoom.SetInputValue("틱범위",   "5")
         self.kiwoom.SetInputValue("수정주가구분	"	,   "1")        
         self.kiwoom.CommRqData("opt10080_req", "OPT10080", 0, "0101")
         ohlcv = self.kiwoom.latest_tr_data
@@ -226,6 +231,37 @@ class KiwoonMain:
         data_min = self.mathsub.GetIndicator(data_min)
         print(data_min)   ##분봉데이터
 
+        ###--------------------------------------------센니
+        print(data_min.iloc[-1]['SMA5'])
+        print(data_min.iloc[-1]['open'])
+        result6 = self.sqlConn.SQL_StockOwn('005930')
+        if int(data_min.iloc[-1]['open']) <= int(data_min.iloc[-1]['SMA5']):
+            print("db X")
+            if result6 == 0:
+                sqlString="INSERT INTO GOLDEN_CROSS_SEARCH (S_NUM, S_NAME, S_OPEN, S_MA5, S_CHECK, S_DATE) VALUES (?, ?, ?, ?, ?, ?)"
+                sdata = ("005930", "삼성전자", int(data_min.iloc[-1]['open']), int(data_min.iloc[-1]['SMA5']), "X", data_min.iloc[-1]['date'])
+                self.sqlConn.SQL_GoldenCrossSearch(sqlString,sdata)
+            else:
+                sqlString="UPDATE GOLDEN_CROSS_SEARCH SET S_OPEN =? , S_MA5 =? , S_DATE = ?"
+                sdata = (int(data_min.iloc[-1]['open']), int(data_min.iloc[-1]['SMA5']), data_min.iloc[-1]['date'])
+                self.sqlConn.SQL_GoldenCrossSearch(sqlString,sdata)
+
+
+        if int(data_min.iloc[-1]['open']) > int(data_min.iloc[-1]['SMA5']) and  result6 > 0:
+            print("db O")
+            sqlString="UPDATE GOLDEN_CROSS_SEARCH SET S_OPEN =? , S_MA5 =? , S_CHECK =?, S_DATE = ?"
+            sdata = (int(data_min.iloc[-1]['open']), int(data_min.iloc[-1]['SMA5']), "O", data_min.iloc[-1]['date'])
+            self.sqlConn.SQL_GoldenCrossSearch(sqlString,sdata)
+
+            #매수기능 추가
+            self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, '005930' ,1,0,"03","")
+            self.kiwoom.wait_secs("매수", 0.5)
+
+        result5 = self.sqlConn.SQL_GoldenCrossO()
+        
+        print(result6)
+        print(result5)
+        ####-----------------------------------------------
 
 
         #print(data_min.iloc[-1]['date'])   -1은 현재봉 값변화중 

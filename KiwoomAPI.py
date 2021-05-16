@@ -78,7 +78,7 @@ class KiwoomAPI(QAxWidget):
         
         self.wait_secs("로그인시도", 3)
         hwnd = self.find_window("Open API Login")
-        edit_id = win32gui.GetDlgItem(hwnd, 0x3E8)
+        edit_id = win32gui.GetDlgItem(hwnd, 0x3E8)        
         edit_pass = win32gui.GetDlgItem(hwnd, 0x3E9)
         edit_cert = win32gui.GetDlgItem(hwnd, 0x3EA)
         button = win32gui.GetDlgItem(hwnd, 0x1)
