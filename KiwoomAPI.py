@@ -22,9 +22,12 @@ class KiwoomAPI(QAxWidget):
         user = self.sqlConn.SQL_UserSelect('USER') 
         self.userName = user[1].strip()
         self.accNum = user[2].strip()
+        print( self.accNum)
         self.passId = user[3].strip()
         self.passAcc = user[4].strip()
         self.userId = user[6].strip()
+        self.passAccNum = user[7].strip()
+        
 
 # ========== #
     def set_kiwoom_api(self):
@@ -82,12 +85,11 @@ class KiwoomAPI(QAxWidget):
         edit_pass = win32gui.GetDlgItem(hwnd, 0x3E9)
         edit_cert = win32gui.GetDlgItem(hwnd, 0x3EA)
         button = win32gui.GetDlgItem(hwnd, 0x1)
-
-        print(self.userId)
-        print(self.passId)
+        
         self.enter_keys(edit_id, self.userId)
         self.enter_keys(edit_pass, self.passId)
         self.enter_keys(edit_cert, self.passAcc)
+        self.click_button(button)
         self.click_button(button)
         self.login_event_loop.exec_()
 
@@ -199,7 +201,7 @@ class KiwoomAPI(QAxWidget):
             if hwnd != 0:
                 # 비밀번호등록
                 edit = win32gui.GetDlgItem(hwnd, 0xCC)
-                win32gui.SendMessage(edit, win32con.WM_SETTEXT, 0, self.passAcc)
+                win32gui.SendMessage(edit, win32con.WM_SETTEXT, 0, self.passAccNum)
 
                 # 전체계좌에 등록
                 win32api.Sleep(100)
