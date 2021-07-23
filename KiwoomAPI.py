@@ -90,7 +90,7 @@ class KiwoomAPI(QAxWidget):
         self.enter_keys(edit_pass, self.passId)
         self.enter_keys(edit_cert, self.passAcc)
         self.click_button(button)
-        self.click_button(button)
+        #self.click_button(button)
         self.login_event_loop.exec_()
 
     #### 로그인 정보 조회 함수
