@@ -12,6 +12,8 @@ import MathAPI
 import pandas as pd
 import schedule
 import time
+import Sqlite3Conn
+
 
 
 class KiwoonMain:   
@@ -23,6 +25,8 @@ class KiwoonMain:
         self.mathsub = MathAPI.MathAPI()                    
         self.kiwoom.comm_connect()  ##자동로그인 
         self.flag = True
+        self.sqlConn = Sqlite3Conn.SQL_CONNECT()  ##DB
+
 # ========== #
     def GetLoginInfo(self):
         # 로그인 상태
@@ -118,14 +122,28 @@ class KiwoonMain:
 
             print('종목명 프린트')
             ###-------------------------- 검색 결과 받아오기끝
+            #self.kiwoom.SendCondition("0101", "초단타", 0, 0)
+            #item = self.kiwoom.serchItem()
+            #print(item)
 
             ###TODO 정세현 조건검색 결과 DB 추가 (상태 확인 컬럼 넣고  0:매수전 상태  1:매수상태  2:매도상태)
             
-            
+
+            #(주완) STOCK_LIST 테이블 정보
+            # S_NUM : 종목번호
+            # S_NAME : 종목이름
+            # S_PRICE : 현재가
+            # B_PRICE : 매입가
+            # H_PRICE : 최고가
+            # B_TIME : 구매시간
+            # E_TIME : 판매시간
+            # STATE : 상태
             
             print('종목 DB 추가 완료 메시지 ')
             ###-------------------------- DB 추가 끝
-            
+            StockList = self.sqlConn.SQL_StockList_0('STOCK_LIST','1') 
+            Sprice = StockList[0][2]
+            print(StockList[0][2]) 
             ###TODO DB 읽어서 종목 리스트 뿌리기 (0: 매수전 상태 리스트)
             ###매수 기능을 실행,  
             
@@ -140,7 +158,7 @@ class KiwoonMain:
             ###--------------------------- 매수상태 종목 뿌리기
 
             ### TODO 매수 기능 매도 기능  만들기
-            ### 시나리오 : 1. 매수전 리스트 불러와서 매수 기능 실행 (0:매수전  > 1:매수상태  상태값 변경 )
+            ### 시나리오 : 1. 매수전 리스트 불러와서 매수 기능 실행 (0:매수전  > 1:매수상태  상태값 변경, 2:매도)    --MYSQL UPDATE 검색해보셈
             ###           2. 매수전 종목이 없으면 무시
             ###           3. 매수상태 리스트 불러와서 현재가 VS 최고가 비교, 갱신
             ###           4. 최고가 VS 현재가 비교시 -1% 이면 매도            
@@ -177,10 +195,10 @@ class KiwoonMain:
             
             
             result_Toplist =  self.kiwoom.ret_data['OPT10030']    
-            print(result_Toplist['Data'][0])   #1위
-            print(result_Toplist['Data'][1])   #2위
-            print(result_Toplist['Data'])
-            print("---------------------")
+            #print(result_Toplist['Data'][0])   #1위
+            #print(result_Toplist['Data'][1])   #2위
+            #print(result_Toplist['Data'])
+            #print("---------------------")
             
             #OPT10032 거래대금 상위 요청
 
@@ -196,7 +214,7 @@ class KiwoonMain:
             
             self.kiwoom.CommRqData( "RQName1"    ,  "OPT10065",  "0"	,  "0101")
             result_marketTop =  self.kiwoom.ret_data['OPT10065']
-            print(result_marketTop)
+            #print(result_marketTop)
             print("----------------------") 
             
             
@@ -222,8 +240,8 @@ class KiwoonMain:
             self.kiwoom.CommRqData( "RQName3"    ,  "OPT90003"	,  "0"	,  "0101")
             result_Program_2 =  self.kiwoom.ret_data['OPT90003']
 
-            print(result_Program_1)
-            print(result_Program_2)
+            #print(result_Program_1)
+           # print(result_Program_2)
 
             print("--------------------")
 
@@ -263,7 +281,7 @@ class KiwoonMain:
             df = df.rename(columns=lambda col:col.lower())           
         
             data = self.mathsub.GetIndicator(df)
-            print(data)     ##일봉 데이터
+            #print(data)     ##일봉 데이터
             self.kiwoom.output_list = output_list['OPT10080'] 
 
             self.kiwoom.SetInputValue("종목코드",  "005930")
@@ -277,13 +295,13 @@ class KiwoonMain:
             data_min.sort_values(by=['date'], axis=0, inplace=True)  #data_min 역순 정렬  최근데이터 하단으로
         
             data_min = self.mathsub.GetIndicator(data_min)
-            print(data_min)   ##분봉데이터
+            #print(data_min)   ##분봉데이터
 
 
 
             #print(data_min.iloc[-1]['date'])   -1은 현재봉 값변화중 
-            print(data_min.iloc[-1]['SMA5']) 
-            print(data_min.iloc[-1]['close'])
+            #print(data_min.iloc[-1]['SMA5']) 
+            #print(data_min.iloc[-1]['close'])
             if int(data_min.iloc[-1]['close']) < int(data_min.iloc[-1]['SMA5']):
                 print("5일선 데드크로스 매도!") 
             #print(data_min.iloc[-1]['SMA10'])
@@ -294,9 +312,9 @@ class KiwoonMain:
             
 
             #TODO 4. (좌니) 다음날 매수 종목 미리 서칭 기능(거래량 , 상승률, 뉴스 등 포함) 
-            print(self.kiwoom.ret_data.keys())
-            print(self.kiwoom.ret_data['OPT90003'])
-            print("program end")
+            #print(self.kiwoom.ret_data.keys())
+            #print(self.kiwoom.ret_data['OPT90003'])
+            #print("program end")
 
         def flagfun():
             self.flag= False

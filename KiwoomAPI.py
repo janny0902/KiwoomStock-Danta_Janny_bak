@@ -41,6 +41,9 @@ class KiwoomAPI(QAxWidget):
         self.OnReceiveTrData.connect(self._receive_tr_data) 
         self.OnEventConnect.connect(self.E_OnEventConnect)
         self.OnReceiveTrData.connect(self.E_OnReceiveTrData)
+
+        #조건검색
+        self.OnReceiveTrCondition.connect(self.E_OnReceiveTrCondition)
         
         
 
@@ -100,6 +103,35 @@ class KiwoomAPI(QAxWidget):
         print(ret) 
         
     ##주문 관련
+    def SendCondition(self, strScrNo, strConditionName, nIndex, nSearch):
+        ret = self.dynamicCall("SendCondition(QString, QString, int, int)",strScrNo, strConditionName, nIndex, nSearch)
+        self.event_loop_SendCondition = QEventLoop()
+        self.event_loop_SendCondition.exec_()
+
+    def E_OnReceiveTrCondition(self, sScrNo, strCodeList, strConditionName, nIndex, nNext):
+        #조건검색 결과 리스트 
+        #sScrNo = 화면번호
+        #strCodeList = 종목번호  ; 구분 ex: 00010;00020;
+        #strConditionName = 조건검색명
+        #nIndex = 조건 인덱스
+        #nNext = 1실시간 , 0조건검색
+        print(sScrNo, strCodeList, strConditionName, nIndex, nNext) 
+         
+        str1 = strCodeList.split(";")        
+        str1.remove("")
+        for row in str1:
+            
+            distinct = self.sqlConn.Sql_Distinct('STOCKITEM',[row]) 
+            #TODO 완료
+            
+            if len(distinct) == 0:                        
+                self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
+            else:
+                #self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
+                self.sqlConn.SQL_Update("UPDATE STOCKITEM SET USE_YN=? WHERE S_NUM=?", ( "Y" ,row))
+
+        self.event_loop_SendCondition.exit()
+
     def E_OnReceiveTrData(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg):
         print(sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg)
 
@@ -302,3 +334,7 @@ class KiwoomAPI(QAxWidget):
             self.tr_event_loop.exit()
         except AttributeError:
             pass
+# 조건검색식을 담는 과정 함수
+    def serchItem(self):
+        item = self.sqlConn.SQL_ItemSelect('STOCKITEM')
+        return item
