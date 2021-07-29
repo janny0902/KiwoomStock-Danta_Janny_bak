@@ -143,6 +143,7 @@ class KiwoonMain:
             ###-------------------------- DB 추가 끝
             StockList = self.sqlConn.SQL_StockList_0('STOCK_LIST','1') 
             Sprice = StockList[0][2]
+            print('------- 종목명 -------')
             print(StockList[0][2]) 
             ###TODO DB 읽어서 종목 리스트 뿌리기 (0: 매수전 상태 리스트)
             ###매수 기능을 실행,  

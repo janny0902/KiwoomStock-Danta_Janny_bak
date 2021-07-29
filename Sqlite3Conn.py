@@ -21,7 +21,7 @@ class SQL_CONNECT:
         conn.close()
         return user
 
-    ##--------------------조건검색 조회 기능--------------------------
+    ##--------------------영웅문 조건검색 조회 기능--------------------------
     def SQL_StockListSelect(self,tableNm):  #전체리스트
         #조건검색 테이블 조회하기
         conn = sqlite3.connect(self.db_path)
@@ -56,11 +56,11 @@ class SQL_CONNECT:
         conn.close()
         return StockList
 
-    def SQL_StockList_0(self,tableNm,StateCode): #매수상태 리스트
+    def SQL_StockList_1(self,tableNm, sCode, StateCode): #매수상태 리스트
         #조건검색 테이블 조회하기
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("UPDATE kiwoom_danta SET name = S_CHECK WHERE id = S_CHECK",('5'))
+        cur.execute("UPDATE " + tableNm + " SET STATE = " + StateCode + " STATE WHERE S_NUM =" + sCode)
         rows = cur.fetchall()
 
         StockList=[] 
