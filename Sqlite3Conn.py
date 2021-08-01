@@ -39,7 +39,7 @@ class SQL_CONNECT:
         conn.close()
         return StockList
 
-    def SQL_StockList_0(self,tableNm,StateCode): #매수전 리스트
+    def SQL_StockList(self,tableNm,StateCode): #조건별 리스트
         #조건검색 테이블 조회하기
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
@@ -56,19 +56,26 @@ class SQL_CONNECT:
         conn.close()
         return StockList
 
-    def SQL_StockList_1(self,tableNm, sCode, StateCode): #매수상태 리스트
-        #조건검색 테이블 조회하기
+    def Sql_Distinct(self,tableNm,data):
+        #데이터 중복값 있는지 조회
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("UPDATE " + tableNm + " SET STATE = " + StateCode + " STATE WHERE S_NUM =" + sCode)
+        cur.execute("SELECT * FROM " + tableNm +' WHERE S_NUM = ?' , data ) 
         rows = cur.fetchall()
 
-        StockList=[] 
-        count=0
+        return rows
 
-        for row in rows:  
-            StockList.insert(count,row) 
-            count+=1
+    def SQL_Insert_f(self,SqlString,s_tuple): 
+        #데이터 삽입하기    
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute(SqlString,(s_tuple)) 
+        conn.commit()
+        conn.close()    
 
-        conn.close()
-        return StockList
+    def SQL_UPDATE_F(self,SqlString,s_tuple):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute(SqlString,(s_tuple)) 
+        conn.commit()
+        conn.close()    

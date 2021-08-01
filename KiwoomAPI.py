@@ -41,6 +41,7 @@ class KiwoomAPI(QAxWidget):
         self.OnReceiveTrData.connect(self._receive_tr_data) 
         self.OnEventConnect.connect(self.E_OnEventConnect)
         self.OnReceiveTrData.connect(self.E_OnReceiveTrData)
+        self.OnReceiveConditionVer.connect(self.E_OnReceiveConditionVer)
 
         #조건검색
         self.OnReceiveTrCondition.connect(self.E_OnReceiveTrCondition)
@@ -108,10 +109,11 @@ class KiwoomAPI(QAxWidget):
         self.event_loop_SendCondition = QEventLoop()
         self.event_loop_SendCondition.exec_()
 
+    
     def E_OnReceiveTrCondition(self, sScrNo, strCodeList, strConditionName, nIndex, nNext):
         #조건검색 결과 리스트 
         #sScrNo = 화면번호
-        #strCodeList = 종목번호  ; 구분 ex: 00010;00020;
+        #strCodeList = 종목번호  ; 구분zzzf ex: 00010;00020;
         #strConditionName = 조건검색명
         #nIndex = 조건 인덱스
         #nNext = 1실시간 , 0조건검색
@@ -120,15 +122,15 @@ class KiwoomAPI(QAxWidget):
         str1 = strCodeList.split(";")        
         str1.remove("")
         for row in str1:
-            
-            distinct = self.sqlConn.Sql_Distinct('STOCKITEM',[row]) 
+            print(row,'종목번호')
+            distinct = self.sqlConn.Sql_Distinct('STOCK_LIST',[row]) 
             #TODO 완료
             
             if len(distinct) == 0:                        
-                self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
-            else:
-                #self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
-                self.sqlConn.SQL_Update("UPDATE STOCKITEM SET USE_YN=? WHERE S_NUM=?", ( "Y" ,row))
+                self.sqlConn.SQL_Insert_f("INSERT INTO STOCK_LIST(S_NUM,S_NAME,S_PRICE,B_PRICE,H_PRICE,B_TIME,E_TIME,STATE) VALUES(?,?,?,?,?,?,?,?)",(row,"",0,0,0,0,0,0))
+            #else:
+            #    #self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
+            #    self.sqlConn.SQL_Update("UPDATE STOCKITEM SET USE_YN=? WHERE S_NUM=?", ( "Y" ,row))
 
         self.event_loop_SendCondition.exit()
 
@@ -137,16 +139,20 @@ class KiwoomAPI(QAxWidget):
 
         if sRQName == 'opt10080_req':            
             self._on_receive_tr_data(sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg)
-        else:
-            self.Call_TR(sTrCode, sRQName)
+        elif sRQName =='시장가_매도' or sRQName =='시장가_매수':
+            print('매도기능 or 매수기능')
             
+        else:
+            self.Call_TR(sTrCode, sRQName)           
+            
+            #self.event_loop_CommRqData.exit()
             self.event_loop_CommRqData.exit()
 
     ####단일 종목 요청 함수
     def CommRqData(self, sRQName, sTrCode, nPrevNext, sScreenNo):
         
         ret = self.dynamicCall('CommRqData(String, String, int, String)', sRQName, sTrCode, nPrevNext, sScreenNo)
-        
+        print(3333)
         self.event_loop_CommRqData = QEventLoop()
         self.event_loop_CommRqData.exec_()   
         time.sleep(TR_REQ_TIME_INTERVAL)
@@ -317,6 +323,7 @@ class KiwoomAPI(QAxWidget):
           #81 : 장후시간외종가
 
         self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb,sOrgOrderNo])
+        
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
         
@@ -338,3 +345,22 @@ class KiwoomAPI(QAxWidget):
     def serchItem(self):
         item = self.sqlConn.SQL_ItemSelect('STOCKITEM')
         return item
+#조건검색 리스트 가져오기
+    def GetConditionLoad(self):
+        ret = self.dynamicCall("GetConditionLoad()")
+        print(ret)
+        self.event_loop_GetConditionLoad = QEventLoop()
+        self.event_loop_GetConditionLoad.exec_()
+        
+        print(ret)
+
+
+
+
+    def E_OnReceiveConditionVer(self, lRet, sMsg):
+        print(lRet, sMsg)
+        ret = self.GetConditionNameList()
+
+        print(ret)
+
+        self.event_loop_GetConditionLoad.exit()

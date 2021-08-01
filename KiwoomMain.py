@@ -77,7 +77,13 @@ class KiwoonMain:
         #    print('현재가',stock['현재가'])
         #    print('매입가',stock['매입가'])    
         return result 
-    
+    def OPT10001(self,scode):   #단일 종목 검색
+        
+        self.kiwoom.output_list = output_list['OPT10001']
+        self.kiwoom.SetInputValue("종목코드", scode)
+        self.kiwoom.CommRqData("OPT10001", "OPT10001", 0, "0101")
+        
+        return self.kiwoom.ret_data['OPT10001']    
 
     def run(self):
         
@@ -141,15 +147,41 @@ class KiwoonMain:
             
             print('종목 DB 추가 완료 메시지 ')
             ###-------------------------- DB 추가 끝
-            StockList = self.sqlConn.SQL_StockList_0('STOCK_LIST','1') 
-            Sprice = StockList[0][2]
-            print('------- 종목명 -------')
-            print(StockList[0][2]) 
+            StockList = self.sqlConn.SQL_StockList('STOCK_LIST','1') 
+            #Sprice = StockList[0][2]
+            #print('------- 종목명 -------')
+            #for stock in StockList:
+            ##    print(stock[1])
+            #    print(stock[2])
+            #    print(stock[3])
+
+                     
+
             ###TODO DB 읽어서 종목 리스트 뿌리기 (0: 매수전 상태 리스트)
             ###매수 기능을 실행,  
             
-
-
+            print("#####")
+            self.kiwoom.GetConditionLoad()
+            self.kiwoom.SendCondition("0101", "초단타", 0, 0)  ## 해당 조건검색에 결과를 DB에 주식코드저장   #급등전 윗꼬리 신호
+            StockList_0 = self.sqlConn.SQL_StockList('STOCK_LIST','0') 
+            print(StockList_0)
+            print("-------------")
+            if len(StockList_0) >= 1:
+                for stock in StockList_0:
+                    result = self.OPT10001(stock[0])
+                    print(result)
+                    print(result['Data'][0]['현재가'],'현재가') 
+                    S_name = result['Data'][0]['종목명'].strip()
+                    S_price = result['Data'][0]['현재가'].strip()
+                    B_price = result['Data'][0]['현재가'].strip()
+                    H_price = result['Data'][0]['현재가'].strip()
+                    S_num = result['Data'][0]['종목코드'].strip()
+                    print(S_num,'종목코드')
+                    self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,1,0,"03","")
+                    self.kiwoom.wait_secs("매도", 0.5)
+                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET S_NAME=?, S_PRICE = ?,B_PRICE=?,H_PRICE=?,B_TIME=?,E_TIME=?, STATE = 1  WHERE S_NUM=?",(S_name,S_price,B_price,H_price,0000,0000,S_num))
+            
+            #item = self.kiwoom.serchItem()
             print('매수전 상태 종목 리스트')
             ###-------------------------- 매수전 리스트 뿌리기 끝
 
@@ -161,11 +193,66 @@ class KiwoonMain:
             ### TODO 매수 기능 매도 기능  만들기
             ### 시나리오 : 1. 매수전 리스트 불러와서 매수 기능 실행 (0:매수전  > 1:매수상태  상태값 변경, 2:매도)    --MYSQL UPDATE 검색해보셈
             ###           2. 매수전 종목이 없으면 무시
+
+            
             ###           3. 매수상태 리스트 불러와서 현재가 VS 최고가 비교, 갱신
+            ###           3_1. 매수가 -1%시 매도 (손절가)
             ###           4. 최고가 VS 현재가 비교시 -1% 이면 매도            
             ###           5. 매도 진행시 잔고 테이블에 수익률 매수가격 매도가격  시간  등등 입력 (일지 확인용)
+            # 3. 현재가 vs 최고가 비교, 갱신
+            StockList = self.sqlConn.SQL_StockList('STOCK_LIST','1') 
+            for stock in StockList:
+                    result = self.OPT10001(stock[0])
+                    print(result)
+                    print(result['Data'][0]['현재가'],'현재가') 
+                   
+                    S_price = int(result['Data'][0]['현재가'].strip())
+                    
+                    H_price = stock[4]
+                    if H_price < S_price:   #고가 보다 현재가가 높으면 고가를 현재가로 갱신
+                        H_price = S_price
+
+                    S_num = result['Data'][0]['종목코드'].strip()
+                    print(S_num,'종목코드')
+                    self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,1,0,"03","")
+                    self.kiwoom.wait_secs("매도", 0.5)
+                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
             
-            
+            print('------- 종목명 -------')
+            for stock in StockList:
+                snum = stock[0]
+                sprice = int(result['Data'][0]['현재가'].strip())  
+                hprice = stock[4]
+                perprice = self.mathsub.percentMius(2,hprice)                
+                print(sprice,'현재가')
+                print(hprice,'최고가')
+                print(perprice,'손절가')
+
+                if sprice < perprice:
+                    print('매도')
+                    self.kiwoom.sendOrder("시장가_매도", "0101", self.kiwoom.accNum, 2, snum,1,0,"03","")
+                    self.kiwoom.wait_secs("매도", 0.5) 
+                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
+
+            print('매수 매도 기능 끝')
+
+
+            # 3_1. 매수가 -1%시 매도 (손절가) (완료,매도기능 추가필요)            
+            StockList = self.sqlConn.SQL_StockList('STOCK_LIST','1')
+            print('------- 종목명 -------')
+            for stock in StockList:
+                snum = stock[0]
+                sprice = stock[2]   
+                bprice = stock[3]
+                perprice = self.mathsub.percentMius(1,bprice)
+                print(sprice,'현재가')
+                print(bprice,'매수가')
+                print(perprice,'손절가')
+
+                if sprice < perprice:
+                    print('매도')
+                    self.kiwoom.sendOrder("시장가_매도", "0101", self.kiwoom.accNum, 2, snum ,1,0,"03","")
+                    self.kiwoom.wait_secs("매도", 0.5)            
 
             print('매수 매도 기능 끝')
             ###-------------------------- 매수 매도 기능 작업 끝
