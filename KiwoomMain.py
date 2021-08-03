@@ -161,8 +161,7 @@ class KiwoonMain:
             ###매수 기능을 실행,  
             
             print("#####")
-            self.kiwoom.GetConditionLoad()
-            self.kiwoom.SendCondition("0101", "초단타", 0, 0)  ## 해당 조건검색에 결과를 DB에 주식코드저장   #급등전 윗꼬리 신호
+           
             StockList_0 = self.sqlConn.SQL_StockList('STOCK_LIST','0') 
             print(StockList_0)
             print("-------------")
@@ -178,7 +177,7 @@ class KiwoonMain:
                     S_num = result['Data'][0]['종목코드'].strip()
                     print(S_num,'종목코드')
                     self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,1,0,"03","")
-                    self.kiwoom.wait_secs("매도", 0.5)
+                    self.kiwoom.wait_secs("매수", 0.5)
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET S_NAME=?, S_PRICE = ?,B_PRICE=?,H_PRICE=?,B_TIME=?,E_TIME=?, STATE = 1  WHERE S_NUM=?",(S_name,S_price,B_price,H_price,0000,0000,S_num))
             
             #item = self.kiwoom.serchItem()
@@ -214,9 +213,9 @@ class KiwoonMain:
 
                     S_num = result['Data'][0]['종목코드'].strip()
                     print(S_num,'종목코드')
-                    self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,1,0,"03","")
-                    self.kiwoom.wait_secs("매도", 0.5)
-                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
+                    #self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,1,0,"03","")
+                    #self.kiwoom.wait_secs("매수", 0.5)
+                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET S_PRICE=?,H_PRICE=? WHERE S_NUM=?",(S_price,H_price,S_num))
             
             print('------- 종목명 -------')
             for stock in StockList:
@@ -407,10 +406,15 @@ class KiwoonMain:
         def flagfun():
             self.flag= False
 
+        def stockSearch():
+            self.kiwoom.GetConditionLoad()
+            self.kiwoom.SendCondition("0101", "삼프로단타띄기", 33, 0)  
 
-        schedule.every(10).seconds.do(job)
-        schedule.every(25).seconds.do(flagfun)
-        schedule.every().day.at("20:48").do(job)
+
+        schedule.every(10).seconds.do(job)   ##반복시간
+        schedule.every(61).seconds.do(stockSearch)   ##반복시간
+        schedule.every(300).seconds.do(flagfun)  ##전체 시간
+        #schedule.every().day.at("20:48").do(job)
 
         while self.flag:
             schedule.run_pending()

@@ -106,8 +106,14 @@ class KiwoomAPI(QAxWidget):
     ##주문 관련
     def SendCondition(self, strScrNo, strConditionName, nIndex, nSearch):
         ret = self.dynamicCall("SendCondition(QString, QString, int, int)",strScrNo, strConditionName, nIndex, nSearch)
+        print("---------------event_loop_SendCondition Start----------------")
         self.event_loop_SendCondition = QEventLoop()
         self.event_loop_SendCondition.exec_()
+
+    def SendConditionStop(self, strScrNo, strConditionName, nIndex):
+        ret = self.dynamicCall("SendCondition(QString, QString, int)", strScrNo, strConditionName, nIndex)
+        
+        print(ret)
 
     
     def E_OnReceiveTrCondition(self, sScrNo, strCodeList, strConditionName, nIndex, nNext):
@@ -131,7 +137,7 @@ class KiwoomAPI(QAxWidget):
             #else:
             #    #self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
             #    self.sqlConn.SQL_Update("UPDATE STOCKITEM SET USE_YN=? WHERE S_NUM=?", ( "Y" ,row))
-
+        print("---------------event_loop_SendCondition END----------------")
         self.event_loop_SendCondition.exit()
 
     def E_OnReceiveTrData(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg):
@@ -139,6 +145,8 @@ class KiwoomAPI(QAxWidget):
 
         if sRQName == 'opt10080_req':            
             self._on_receive_tr_data(sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg)
+            print("-------------event_loop_CommRqData END-------------------")
+            self.event_loop_CommRqData.exit()
         elif sRQName =='시장가_매도' or sRQName =='시장가_매수':
             print('매도기능 or 매수기능')
             
@@ -146,13 +154,14 @@ class KiwoomAPI(QAxWidget):
             self.Call_TR(sTrCode, sRQName)           
             
             #self.event_loop_CommRqData.exit()
+            print("-------------event_loop_CommRqData END-------------------")
             self.event_loop_CommRqData.exit()
 
     ####단일 종목 요청 함수
     def CommRqData(self, sRQName, sTrCode, nPrevNext, sScreenNo):
         
-        ret = self.dynamicCall('CommRqData(String, String, int, String)', sRQName, sTrCode, nPrevNext, sScreenNo)
-        print(3333)
+        ret = self.dynamicCall('CommRqData(String, String, int, String)', sRQName, sTrCode, nPrevNext, sScreenNo)     
+        print("-------------event_loop_CommRqData Start-------------------")   
         self.event_loop_CommRqData = QEventLoop()
         self.event_loop_CommRqData.exec_()   
         time.sleep(TR_REQ_TIME_INTERVAL)
@@ -324,6 +333,7 @@ class KiwoomAPI(QAxWidget):
 
         self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb,sOrgOrderNo])
         
+        print("-----------tr_event_loop Start---------------")
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
         
@@ -336,19 +346,21 @@ class KiwoomAPI(QAxWidget):
 
         if rqname == "opt10081_req":
             self._opt10081(rqname, trcode)
-
-        try:
+        elif rqname =='시장가_매도' or rqname =='시장가_매수':
+            print("-----------tr_event_loop END---------------")
             self.tr_event_loop.exit()
+        try:
+            print('확인')
         except AttributeError:
             pass
 # 조건검색식을 담는 과정 함수
-    def serchItem(self):
-        item = self.sqlConn.SQL_ItemSelect('STOCKITEM')
-        return item
+
 #조건검색 리스트 가져오기
     def GetConditionLoad(self):
         ret = self.dynamicCall("GetConditionLoad()")
         print(ret)
+        
+        print("-------------event_loop_GetConditionLoad Start------------------")
         self.event_loop_GetConditionLoad = QEventLoop()
         self.event_loop_GetConditionLoad.exec_()
         
@@ -362,5 +374,9 @@ class KiwoomAPI(QAxWidget):
         ret = self.GetConditionNameList()
 
         print(ret)
+        print("-------------event_loop_GetConditionLoad END------------------")
 
         self.event_loop_GetConditionLoad.exit()
+
+    def E_OnReceiveRealCondition(self, strCode, strType, strConditionName, strConditionIndex):
+        print(strCode, strType, strConditionName, strConditionIndex)
