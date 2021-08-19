@@ -40,7 +40,11 @@ class MathAPI:
         return result
 
     def searchMoney(self,buy_money,price):  ##구매수량 구해기
-        result = buy_money / price
+        if str(price)[0] == '-':
+            price = str(price)[1:]
+
+        print(price)
+        result = buy_money / int(price)
         return round(result)-1
 
         #TALIB 사용 MACD 및 RSI 구하기

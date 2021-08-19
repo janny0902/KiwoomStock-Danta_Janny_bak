@@ -25,6 +25,7 @@ class KiwoomAPI(QAxWidget):
         print( self.accNum)
         self.passId = user[3].strip()
         self.passAcc = user[4].strip()
+        self.buyMoney = user[5]
         self.userId = user[6].strip()
         self.passAccNum = user[7].strip()
         
@@ -94,7 +95,7 @@ class KiwoomAPI(QAxWidget):
         self.enter_keys(edit_pass, self.passId)
         self.enter_keys(edit_cert, self.passAcc)
         self.click_button(button)
-        #self.click_button(button)
+        self.click_button(button)
         self.login_event_loop.exec_()
 
     #### 로그인 정보 조회 함수
@@ -106,7 +107,7 @@ class KiwoomAPI(QAxWidget):
     ##주문 관련
     def SendCondition(self, strScrNo, strConditionName, nIndex, nSearch):
         ret = self.dynamicCall("SendCondition(QString, QString, int, int)",strScrNo, strConditionName, nIndex, nSearch)
-        print("---------------event_loop_SendCondition Start----------------")
+        #print("---------------event_loop_SendCondition Start----------------")
         self.event_loop_SendCondition = QEventLoop()
         self.event_loop_SendCondition.exec_()
 
@@ -137,7 +138,7 @@ class KiwoomAPI(QAxWidget):
             #else:
             #    #self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
             #    self.sqlConn.SQL_Update("UPDATE STOCKITEM SET USE_YN=? WHERE S_NUM=?", ( "Y" ,row))
-        print("---------------event_loop_SendCondition END----------------")
+        #print("---------------event_loop_SendCondition END----------------")
         self.event_loop_SendCondition.exit()
 
     def E_OnReceiveTrData(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg):
@@ -145,23 +146,23 @@ class KiwoomAPI(QAxWidget):
 
         if sRQName == 'opt10080_req':            
             self._on_receive_tr_data(sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg)
-            print("-------------event_loop_CommRqData END-------------------")
+            #print("-------------event_loop_CommRqData END-------------------")
             self.event_loop_CommRqData.exit()
         elif sRQName =='시장가_매도' or sRQName =='시장가_매수':
-            print('매도기능 or 매수기능')
+            print('구분점')
             
         else:
             self.Call_TR(sTrCode, sRQName)           
             
             #self.event_loop_CommRqData.exit()
-            print("-------------event_loop_CommRqData END-------------------")
+            #print("-------------event_loop_CommRqData END-------------------")
             self.event_loop_CommRqData.exit()
 
     ####단일 종목 요청 함수
     def CommRqData(self, sRQName, sTrCode, nPrevNext, sScreenNo):
         
         ret = self.dynamicCall('CommRqData(String, String, int, String)', sRQName, sTrCode, nPrevNext, sScreenNo)     
-        print("-------------event_loop_CommRqData Start-------------------")   
+        #print("-------------event_loop_CommRqData Start-------------------")   
         self.event_loop_CommRqData = QEventLoop()
         self.event_loop_CommRqData.exec_()   
         time.sleep(TR_REQ_TIME_INTERVAL)
@@ -333,7 +334,7 @@ class KiwoomAPI(QAxWidget):
 
         self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb,sOrgOrderNo])
         
-        print("-----------tr_event_loop Start---------------")
+        #print("-----------tr_event_loop Start---------------")
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
         
@@ -347,10 +348,10 @@ class KiwoomAPI(QAxWidget):
         if rqname == "opt10081_req":
             self._opt10081(rqname, trcode)
         elif rqname =='시장가_매도' or rqname =='시장가_매수':
-            print("-----------tr_event_loop END---------------")
+            #print("-----------tr_event_loop END---------------")
             self.tr_event_loop.exit()
         try:
-            print('확인')
+            print('구분점')
         except AttributeError:
             pass
 # 조건검색식을 담는 과정 함수
@@ -360,7 +361,7 @@ class KiwoomAPI(QAxWidget):
         ret = self.dynamicCall("GetConditionLoad()")
         print(ret)
         
-        print("-------------event_loop_GetConditionLoad Start------------------")
+        #print("-------------event_loop_GetConditionLoad Start------------------")
         self.event_loop_GetConditionLoad = QEventLoop()
         self.event_loop_GetConditionLoad.exec_()
         
@@ -373,8 +374,8 @@ class KiwoomAPI(QAxWidget):
         print(lRet, sMsg)
         ret = self.GetConditionNameList()
 
-        print(ret)
-        print("-------------event_loop_GetConditionLoad END------------------")
+        #print(ret)
+        #print("-------------event_loop_GetConditionLoad END------------------")
 
         self.event_loop_GetConditionLoad.exit()
 
