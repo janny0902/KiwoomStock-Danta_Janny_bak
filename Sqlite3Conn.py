@@ -3,7 +3,7 @@ import time
 
 class SQL_CONNECT:
     def __init__(self):
-        self.db_path = "D:\kiwoom_stock\KiwoomStock-Danta_Janny_bak/kiwoom_danta.db"  #DB경로
+        self.db_path = "C:/Users/janny0902/kiwoom_danta.db"  #DB경로
         self.nowdate = time.strftime('%Y-%m-%d', time.localtime(time.time()))
 
     ##--------------------조회 기능--------------------------

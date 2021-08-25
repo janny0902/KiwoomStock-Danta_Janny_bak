@@ -24,7 +24,7 @@ class KiwoonMain:
         
 
     def __init__(self):
-        self.nowdate = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        
         self.kiwoom = KiwoomAPI.KiwoomAPI()
         #self.kiwoom.CommConnect()        
         self.mathsub = MathAPI.MathAPI()                    
@@ -98,8 +98,12 @@ class KiwoonMain:
         api_con.myAccount()              #계좌입력(자동 완성)        
         #print('program end')
 
+        #self.stockSearch()
         self.kiwoom.GetConditionLoad()
         self.kiwoom.SendCondition("0101", "삼프로단타띄기", 33, 0)  
+        print('program running...')
+        msg_String = "program running..."
+        self.telegram.Tel_MsgPush(msg_String)   
         ####------------------------####
         #전체 스토리
         #0850 스케줄 작동 로그인 기능 실행
@@ -130,7 +134,7 @@ class KiwoonMain:
         #TODO 1. (정세현) 스케줄러 적용  구글에 python 스케줄러 라고 검색하면  사용 방법 나옴  10초에 한번식 print('성공') 찍는 기능 만들기
                     #매일 오후 3시 15분에 print('매도') 찍기 기능  
         def job():
-             
+            self.nowdate = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             #print('매도')
             ### TODO 정세현 조건 검색 결과 받아오기  ###텔레그램으로 매수 매도 상황 받을꺼면 물어보셈
 
@@ -262,7 +266,7 @@ class KiwoonMain:
                 S_price = int(NowPrice)  
                 H_price = stock[4]
                 EA = stock[8]
-                perprice = self.mathsub.percentMius(2,H_price)                
+                perprice = self.mathsub.percentMius(1,H_price)                
                 #print(S_price,'현재가')
                 #print(H_price,'최고가')
                 #print(perprice,'익절가')
@@ -453,10 +457,16 @@ class KiwoonMain:
             self.kiwoom.GetConditionLoad()
             self.kiwoom.SendCondition("0101", "삼프로단타띄기", 33, 0)  
 
+        def checkProgram():
+            print('program running...')
+            msg_String = "program running..."
+            self.telegram.Tel_MsgPush(msg_String)            
+
 
         schedule.every(10).seconds.do(job)   ##반복시간
         schedule.every(61).seconds.do(stockSearch)   ##반복시간
-        schedule.every(30000).seconds.do(flagfun)  ##전체 시간
+        schedule.every(600).seconds.do(checkProgram)  ##전체 시간
+        schedule.every(18000).seconds.do(flagfun)  ##전체 시간
         #schedule.every().day.at("20:48").do(job)
 
         while self.flag:
