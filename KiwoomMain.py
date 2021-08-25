@@ -206,7 +206,7 @@ class KiwoonMain:
                     result_BOX =  self.kiwoom.ret_data['OPW00005']  
                     #print(result_BOX)
 
-                    #잠시막음
+                   
                     self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,EA,0,"03","")
                     self.kiwoom.wait_secs("매수", 0.5)
                     print(self.nowdate , '매수 시점')
@@ -214,6 +214,7 @@ class KiwoonMain:
                     print(msg_String)
                     self.telegram.Tel_MsgPush(msg_String)  
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET S_NAME=?, S_PRICE = ?,B_PRICE=?,H_PRICE=?,B_TIME=?,E_TIME=?, STATE = 1 ,EA=?  WHERE S_NUM=?",(S_name,S_price,B_price,H_price,0000,0000,EA,S_num))
+                    self.kiwoom.wait_secs(msg_String,0.3)
             
             #item = self.kiwoom.serchItem()
             #print('매수전 상태 종목 리스트')
@@ -254,6 +255,7 @@ class KiwoonMain:
                     
                     
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET S_PRICE=?,H_PRICE=? WHERE S_NUM=?",(S_price,H_price,S_num))
+                    
             
             #print('------- 종목명 -------')
             for stock in StockList:
@@ -266,7 +268,7 @@ class KiwoonMain:
                 S_price = int(NowPrice)  
                 H_price = stock[4]
                 EA = stock[8]
-                perprice = self.mathsub.percentMius(1,H_price)                
+                perprice = self.mathsub.percentMius(1.5,H_price)                
                 #print(S_price,'현재가')
                 #print(H_price,'최고가')
                 #print(perprice,'익절가')
@@ -280,6 +282,7 @@ class KiwoonMain:
                     msg_String = "종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 최고가 -2 퍼센 매도(익절)" %(snum,snam,str(B_price),str(S_price))
                     print(msg_String)
                     self.telegram.Tel_MsgPush(msg_String)  
+                    self.kiwoom.wait_secs(msg_String,0.3)
 
             print(self.nowdate,'매수 매도 기능 끝')
 
@@ -303,8 +306,8 @@ class KiwoonMain:
                     self.kiwoom.wait_secs("매도", 0.5)  
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
                     msg_String = "종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 1퍼센 손절 매도" %(snum,snam,B_price,S_price)
-                    self.telegram.Tel_MsgPush(msg_String)            
-                    print(msg_String)
+                    self.telegram.Tel_MsgPush(msg_String)  
+                    self.kiwoom.wait_secs(msg_String,0.3)          
 
             #print('매수 매도 기능 끝')
             ###-------------------------- 매수 매도 기능 작업 끝
