@@ -100,9 +100,9 @@ class KiwoonMain:
 
         #self.stockSearch()
         self.kiwoom.GetConditionLoad()
-        self.kiwoom.SendCondition("0101", "삼프로단타띄기", 33, 0)  
+        self.kiwoom.SendCondition("0101", "단타_2", 1, 0)  
         print('program running...')
-        msg_String = "program running..."
+        msg_String = "(정세현)program running..."
         self.telegram.Tel_MsgPush(msg_String)   
         ####------------------------####
         #전체 스토리
@@ -197,7 +197,9 @@ class KiwoonMain:
                     #print(self.kiwoom.buyMoney,'매수한도금액')
                     
                     BuyMoneyMax = self.kiwoom.buyMoney
+
                     EA = self.mathsub.searchMoney(int(BuyMoneyMax),int(B_price))
+                   
                     self.kiwoom.output_list = output_list['OPW00005']        
                     self.kiwoom.SetInputValue("계좌번호"	,  self.kiwoom.accNum)
                     self.kiwoom.SetInputValue("비밀번호"	,  self.kiwoom.passAcc)     
@@ -210,7 +212,7 @@ class KiwoonMain:
                     self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,EA,0,"03","")
                     self.kiwoom.wait_secs("매수", 0.5)
                     print(self.nowdate , '매수 시점')
-                    msg_String = "종목코드:%s\n종목명:%s\n매수가:%s \n시장가 매수" %(stock[0],S_name,S_price)
+                    msg_String = "(정세현)종목코드:%s\n종목명:%s\n매수가:%s \n시장가 매수" %(stock[0],S_name,S_price)
                     print(msg_String)
                     self.telegram.Tel_MsgPush(msg_String)  
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET S_NAME=?, S_PRICE = ?,B_PRICE=?,H_PRICE=?,B_TIME=?,E_TIME=?, STATE = 1 ,EA=?  WHERE S_NUM=?",(S_name,S_price,B_price,H_price,0000,0000,EA,S_num))
@@ -277,7 +279,7 @@ class KiwoonMain:
                     self.kiwoom.wait_secs("매도", 0.5) 
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
                     #수정필요
-                    msg_String = "종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 최고가 -2 퍼센 매도(익절)" %(snum,snam,str(B_price),str(S_price))
+                    msg_String = "(정세현)종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 최고가 -2 퍼센 매도(익절)" %(snum,snam,str(B_price),str(S_price))
                     print(msg_String)
                     self.telegram.Tel_MsgPush(msg_String)  
 
@@ -302,7 +304,7 @@ class KiwoonMain:
                     self.kiwoom.sendOrder("시장가_매도", "0101", self.kiwoom.accNum, 2, snum ,EA,0,"03","")
                     self.kiwoom.wait_secs("매도", 0.5)  
                     self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
-                    msg_String = "종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 1퍼센 손절 매도" %(snum,snam,B_price,S_price)
+                    msg_String = "(정세현)종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 1퍼센 손절 매도" %(snum,snam,B_price,S_price)
                     self.telegram.Tel_MsgPush(msg_String)            
                     print(msg_String)
 
@@ -455,11 +457,11 @@ class KiwoonMain:
 
         def stockSearch():
             self.kiwoom.GetConditionLoad()
-            self.kiwoom.SendCondition("0101", "삼프로단타띄기", 33, 0)  
+            self.kiwoom.SendCondition("0101", "단타_2", 1, 0)  
 
         def checkProgram():
             print('program running...')
-            msg_String = "program running..."
+            msg_String = "(정세현)program running..."
             self.telegram.Tel_MsgPush(msg_String)            
 
 
