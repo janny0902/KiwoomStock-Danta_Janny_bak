@@ -103,6 +103,8 @@ class KiwoonMain:
         self.kiwoom.SendCondition("0101", "단타_2", 1, 0)  
         print('program running...')
         msg_String = "(정세현)program running..."
+        #self.telegram.Tel_GetId() 텔레그램 아이디 구하기
+
         self.telegram.Tel_MsgPush(msg_String)   
         ####------------------------####
         #전체 스토리
@@ -277,7 +279,7 @@ class KiwoonMain:
                     print(self.nowdate , '익절매도 시점')
                     self.kiwoom.sendOrder("시장가_매도", "0101", self.kiwoom.accNum, 2, snum,EA,0,"03","")
                     self.kiwoom.wait_secs("매도", 0.5) 
-                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
+                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(snum,))
                     #수정필요
                     msg_String = "(정세현)종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 최고가 -2 퍼센 매도(익절)" %(snum,snam,str(B_price),str(S_price))
                     print(msg_String)
@@ -303,7 +305,7 @@ class KiwoonMain:
                     print(self.nowdate , '손절매도')
                     self.kiwoom.sendOrder("시장가_매도", "0101", self.kiwoom.accNum, 2, snum ,EA,0,"03","")
                     self.kiwoom.wait_secs("매도", 0.5)  
-                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(S_num,))
+                    self.sqlConn.SQL_UPDATE_F("UPDATE STOCK_LIST SET  STATE=2 WHERE S_NUM=?",(snum,))
                     msg_String = "(정세현)종목코드:%s\n종목명:%s\n매수가:%s\n매도가:%s\n 1퍼센 손절 매도" %(snum,snam,B_price,S_price)
                     self.telegram.Tel_MsgPush(msg_String)            
                     print(msg_String)
@@ -461,6 +463,8 @@ class KiwoonMain:
 
         def checkProgram():
             print('program running...')
+            
+
             msg_String = "(정세현)program running..."
             self.telegram.Tel_MsgPush(msg_String)            
 
