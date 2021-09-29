@@ -1,8 +1,6 @@
 import sys
 from PyQt5.QtWidgets import *
-
 import FinanceDataReader as fdr
-
 from Config import *
 from PyQt5.QtCore import *
 from PyQt5.QAxContainer import *
@@ -209,7 +207,6 @@ class KiwoonMain:
                     self.kiwoom.CommRqData( "RQName"	,  "OPW00005"	,  "0"	,  "0391")
                     result_BOX =  self.kiwoom.ret_data['OPW00005']  
                     #print(result_BOX)
-
                     #잠시막음
                     self.kiwoom.sendOrder("시장가_매수", "0101", self.kiwoom.accNum, 1, S_num ,EA,0,"03","")
                     self.kiwoom.wait_secs("매수", 0.5)
