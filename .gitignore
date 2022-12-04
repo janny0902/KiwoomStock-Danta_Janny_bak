@@ -9,4 +9,5 @@ __pycache__/tr_receive_handler.cpython-39.pyc
 **/venv/
 TA_Lib-0.4.19-cp39-cp39-win32.whl
 
-
+## 개인정보 상수처리
+MyPrivacy.py
