@@ -1,9 +1,10 @@
 import sqlite3
 import time
+from MyPrivacy import *
 
 class SQL_CONNECT:
     def __init__(self):
-        self.db_path = "C:/Users/janny0902/kiwoom_danta.db"  #DB경로
+        self.db_path = db_path  #DB경로
         self.nowdate = time.strftime('%Y-%m-%d', time.localtime(time.time()))
 
     ##--------------------조회 기능--------------------------
@@ -11,12 +12,12 @@ class SQL_CONNECT:
         #회원 조회하기
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM " + tableNm ) 
+        cur.execute("SELECT * FROM " + tableNm )
         rows = cur.fetchall()
-        user=[] 
-        
-        for row in rows:      
-                  
+        user=[]
+
+        for row in rows:
+
             user = row
         conn.close()
         return user
@@ -26,14 +27,14 @@ class SQL_CONNECT:
         #조건검색 테이블 조회하기
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM " + tableNm ) 
+        cur.execute("SELECT * FROM " + tableNm )
         rows = cur.fetchall()
 
-        StockList=[] 
+        StockList=[]
         count=0
 
-        for row in rows:  
-            StockList.insert(count,row) 
+        for row in rows:
+            StockList.insert(count,row)
             count+=1
 
         conn.close()
@@ -43,14 +44,14 @@ class SQL_CONNECT:
         #조건검색 테이블 조회하기
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM " + tableNm +" WHERE STATE = '"+StateCode+"'") 
+        cur.execute("SELECT * FROM " + tableNm +" WHERE STATE = '"+StateCode+"'")
         rows = cur.fetchall()
 
-        StockList=[] 
+        StockList=[]
         count=0
 
-        for row in rows:  
-            StockList.insert(count,row) 
+        for row in rows:
+            StockList.insert(count,row)
             count+=1
 
         conn.close()
@@ -60,22 +61,22 @@ class SQL_CONNECT:
         #데이터 중복값 있는지 조회
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM " + tableNm +' WHERE S_NUM = ?' , data ) 
+        cur.execute("SELECT * FROM " + tableNm +' WHERE S_NUM = ?' , data )
         rows = cur.fetchall()
 
         return rows
 
-    def SQL_Insert_f(self,SqlString,s_tuple): 
-        #데이터 삽입하기    
+    def SQL_Insert_f(self,SqlString,s_tuple):
+        #데이터 삽입하기
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute(SqlString,(s_tuple)) 
+        cur.execute(SqlString,(s_tuple))
         conn.commit()
-        conn.close()    
+        conn.close()
 
     def SQL_UPDATE_F(self,SqlString,s_tuple):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute(SqlString,(s_tuple)) 
+        cur.execute(SqlString,(s_tuple))
         conn.commit()
-        conn.close()    
+        conn.close()

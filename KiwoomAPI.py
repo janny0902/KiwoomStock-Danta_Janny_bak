@@ -3,7 +3,7 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
 import time
 import win32gui
-import win32con 
+import win32con
 import win32api
 import Sqlite3Conn
 
@@ -19,7 +19,7 @@ class KiwoomAPI(QAxWidget):
         self.set_event_slot()
         self.sqlConn = Sqlite3Conn.SQL_CONNECT()  ##DB
 
-        user = self.sqlConn.SQL_UserSelect('USER') 
+        user = self.sqlConn.SQL_UserSelect('USER')
         self.userName = user[1].strip()
         self.accNum = user[2].strip()
         print( self.accNum)
@@ -28,7 +28,7 @@ class KiwoomAPI(QAxWidget):
         self.buyMoney = user[5]
         self.userId = user[6].strip()
         self.passAccNum = user[7].strip()
-        
+
 
 # ========== #
     def set_kiwoom_api(self):
@@ -39,17 +39,17 @@ class KiwoomAPI(QAxWidget):
         self.OnReceiveMsg.connect(self.E_OnReceiveMsg)
 
         # 로그인 버전처리
-        self.OnReceiveTrData.connect(self._receive_tr_data) 
+        self.OnReceiveTrData.connect(self._receive_tr_data)
         self.OnEventConnect.connect(self.E_OnEventConnect)
         self.OnReceiveTrData.connect(self.E_OnReceiveTrData)
         self.OnReceiveConditionVer.connect(self.E_OnReceiveConditionVer)
 
         #조건검색
         self.OnReceiveTrCondition.connect(self.E_OnReceiveTrCondition)
-        
-        
 
-        
+
+
+
 
 # ========== #
     ### Event 함수 ###
@@ -83,14 +83,14 @@ class KiwoomAPI(QAxWidget):
         self.dynamicCall("CommConnect()")
         self.login_event_loop = QEventLoop()
         print("수동 로그인 함수 호출")
-        
+
         self.wait_secs("로그인시도", 3)
         hwnd = self.find_window("Open API Login")
         edit_id = win32gui.GetDlgItem(hwnd, 0x3E8)
         edit_pass = win32gui.GetDlgItem(hwnd, 0x3E9)
         edit_cert = win32gui.GetDlgItem(hwnd, 0x3EA)
         button = win32gui.GetDlgItem(hwnd, 0x1)
-        
+
         self.enter_keys(edit_id, self.userId)
         self.enter_keys(edit_pass, self.passId)
         self.enter_keys(edit_cert, self.passAcc)
@@ -102,8 +102,8 @@ class KiwoomAPI(QAxWidget):
     def GetLoginInfo(self, kind=''):
         ret = self.dynamicCall('GetLoginInfo(String)', kind)
 
-        print(ret) 
-        
+        print(ret)
+
     ##주문 관련
     def SendCondition(self, strScrNo, strConditionName, nIndex, nSearch):
         ret = self.dynamicCall("SendCondition(QString, QString, int, int)",strScrNo, strConditionName, nIndex, nSearch)
@@ -113,27 +113,27 @@ class KiwoomAPI(QAxWidget):
 
     def SendConditionStop(self, strScrNo, strConditionName, nIndex):
         ret = self.dynamicCall("SendCondition(QString, QString, int)", strScrNo, strConditionName, nIndex)
-        
+
         print(ret)
 
-    
+
     def E_OnReceiveTrCondition(self, sScrNo, strCodeList, strConditionName, nIndex, nNext):
-        #조건검색 결과 리스트 
+        #조건검색 결과 리스트
         #sScrNo = 화면번호
         #strCodeList = 종목번호  ; 구분zzzf ex: 00010;00020;
         #strConditionName = 조건검색명
         #nIndex = 조건 인덱스
         #nNext = 1실시간 , 0조건검색
-        print(sScrNo, strCodeList, strConditionName, nIndex, nNext) 
-         
-        str1 = strCodeList.split(";")        
+        print(sScrNo, strCodeList, strConditionName, nIndex, nNext)
+
+        str1 = strCodeList.split(";")
         str1.remove("")
         for row in str1:
             print(row,'종목번호')
-            distinct = self.sqlConn.Sql_Distinct('STOCK_LIST',[row]) 
+            distinct = self.sqlConn.Sql_Distinct('STOCK_LIST',[row])
             #TODO 완료
-            
-            if len(distinct) == 0:                        
+
+            if len(distinct) == 0:
                 self.sqlConn.SQL_Insert_f("INSERT INTO STOCK_LIST(S_NUM,S_NAME,S_PRICE,B_PRICE,H_PRICE,B_TIME,E_TIME,STATE) VALUES(?,?,?,?,?,?,?,?)",(row,"",0,0,0,0,0,0))
             #else:
             #    #self.sqlConn.SQL_Insert_f("INSERT INTO STOCKITEM(S_NUM,USE_YN,N_NUM,D_DATE) VALUES(?,?,?,?)",row,"Y",strConditionName,0)
@@ -144,32 +144,32 @@ class KiwoomAPI(QAxWidget):
     def E_OnReceiveTrData(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg):
         print(sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg)
 
-        if sRQName == 'opt10080_req':            
+        if sRQName == 'opt10080_req':
             self._on_receive_tr_data(sScrNo, sRQName, sTrCode, sRecordName, sPrevNext, nDataLength, sErrorCode, sMessage, sSplmMsg)
             #print("-------------event_loop_CommRqData END-------------------")
             self.event_loop_CommRqData.exit()
         elif sRQName =='시장가_매도' or sRQName =='시장가_매수':
             print('구분점')
-            
+
         else:
-            self.Call_TR(sTrCode, sRQName)           
-            
+            self.Call_TR(sTrCode, sRQName)
+
             #self.event_loop_CommRqData.exit()
             #print("-------------event_loop_CommRqData END-------------------")
             self.event_loop_CommRqData.exit()
 
     ####단일 종목 요청 함수
     def CommRqData(self, sRQName, sTrCode, nPrevNext, sScreenNo):
-        
-        ret = self.dynamicCall('CommRqData(String, String, int, String)', sRQName, sTrCode, nPrevNext, sScreenNo)     
-        #print("-------------event_loop_CommRqData Start-------------------")   
+
+        ret = self.dynamicCall('CommRqData(String, String, int, String)', sRQName, sTrCode, nPrevNext, sScreenNo)
+        #print("-------------event_loop_CommRqData Start-------------------")
         self.event_loop_CommRqData = QEventLoop()
-        self.event_loop_CommRqData.exec_()   
+        self.event_loop_CommRqData.exec_()
         time.sleep(TR_REQ_TIME_INTERVAL)
-        
-        
+
+
     ####시간 대기 함수
-    def wait_secs(self,msg, secs=10):        
+    def wait_secs(self,msg, secs=10):
         while secs > 0:
             time.sleep(1)
             print(f"{msg} waiting: {secs}")
@@ -179,13 +179,13 @@ class KiwoomAPI(QAxWidget):
     def Call_TR(self, strTrCode, sRQName):
         self.ret_data[strTrCode] = {}
         self.ret_data[strTrCode]['Data'] = {}
-        
+
         self.ret_data[strTrCode]['TrCode'] = strTrCode
 
 
         count = self.GetRepeatCnt(strTrCode, sRQName)
         self.ret_data[strTrCode]['Count'] = count
-        
+
 
         if count == 0:
             temp_list = []
@@ -195,7 +195,7 @@ class KiwoomAPI(QAxWidget):
                 temp_dict[output] = data
 
             temp_list.append(temp_dict)
-            
+
             self.ret_data[strTrCode]['Data'] = temp_list
 
         if count >= 1:
@@ -207,11 +207,11 @@ class KiwoomAPI(QAxWidget):
                     temp_dict[output] = data
 
                 temp_list.append(temp_dict)
-            
+
             self.ret_data[strTrCode]['Data'] = temp_list
 
-        
-            
+
+
     ####화면 찾기 기능
     def find_window(self,caption):
         hwnd = win32gui.FindWindow(None, caption)
@@ -232,7 +232,7 @@ class KiwoomAPI(QAxWidget):
         windows = []
         win32gui.EnumWindows(self.window_enumeration_handler, windows)
         return windows
-    
+
     ##화면 내 버튼 클릭 이벤트
     def click_button(self,btn_hwnd):
         #win32api.SendMessage(btn_hwnd, win32con.BM_CLICK, 0, 0)
@@ -243,7 +243,7 @@ class KiwoomAPI(QAxWidget):
 
     ####자동 입력 기능
     def auto_on(self):
-        try:                 
+        try:
 
             hwnd = self.find_window("계좌비밀번호")
             if hwnd != 0:
@@ -256,7 +256,7 @@ class KiwoomAPI(QAxWidget):
                 button_register_all = win32gui.GetDlgItem(hwnd, 0xD4)
                 self.click_button(button_register_all)
 
-                # 체크박스 체크 
+                # 체크박스 체크
                 #checkbox = win32gui.GetDlgItem(hwnd, 0xD3)
                 #checked = win32gui.SendMessage(checkbox, win32con.BM_GETCHECK)
                 #if not checked:
@@ -266,7 +266,7 @@ class KiwoomAPI(QAxWidget):
                 button= win32gui.GetDlgItem(hwnd, 0x01)
                 self.click_button(button)
         except Exception as e:
-            print(e)   
+            print(e)
 
     def _on_receive_tr_data(self, screen_no, rqname, trcode, record_name, next,
                             unused1, unused2, unused3, unused4):
@@ -277,7 +277,7 @@ class KiwoomAPI(QAxWidget):
         if next == '2':
             self.is_tr_data_remained = True
         else:
-            
+
             self.is_tr_data_remained = False
 
         if rqname == "opt10081_req":
@@ -286,10 +286,10 @@ class KiwoomAPI(QAxWidget):
             self.latest_tr_data = tr.on_receive_opt10080(self, rqname, trcode)
 
         try:
-            self.event_loop_CommRqData.exit() 
-                    
-            
-        except AttributeError:            
+            self.event_loop_CommRqData.exit()
+
+
+        except AttributeError:
             pass
 
     def get_repeat_cnt(self, trcode, rqname):
@@ -300,11 +300,11 @@ class KiwoomAPI(QAxWidget):
         ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString)", code,
                                real_type, field_name, index, item_name)
         return ret.strip()
-  
+
 
     def enter_keys(self,hwnd, data):
-        win32api.SendMessage(hwnd, win32con.EM_SETSEL, 0, -1) 
-        win32api.SendMessage(hwnd, win32con.EM_REPLACESEL, 0, data) 
+        win32api.SendMessage(hwnd, win32con.EM_SETSEL, 0, -1)
+        win32api.SendMessage(hwnd, win32con.EM_REPLACESEL, 0, data)
 
     def sendOrder(self, sRQName, sScreenNo, sAccNo, nOrderType,sCode,nQty,nPrice,sHogaGb,sOrgOrderNo):
           #BSTR sRQName, // 사용자 구분명
@@ -315,7 +315,7 @@ class KiwoomAPI(QAxWidget):
           #LONG nQty,  // 주문수량
           #LONG nPrice, // 주문가격  시장가 매수시 03
           #BSTR sHogaGb,   // 거래구분(혹은 호가구분)은 아래 참고
-          #BSTR sOrgOrderNo  // 원주문번호입니다. 신규주문에는 공백, 정정(취소)주문할 원주문번호를 입력합니다.     
+          #BSTR sOrgOrderNo  // 원주문번호입니다. 신규주문에는 공백, 정정(취소)주문할 원주문번호를 입력합니다.
           # [거래구분]
           #00 : 지정가
           #03 : 시장가
@@ -333,11 +333,11 @@ class KiwoomAPI(QAxWidget):
           #81 : 장후시간외종가
 
         self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb,sOrgOrderNo])
-        
+
         #print("-----------tr_event_loop Start---------------")
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
-        
+
 
     def _receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
         if next == '2':
@@ -360,11 +360,11 @@ class KiwoomAPI(QAxWidget):
     def GetConditionLoad(self):
         ret = self.dynamicCall("GetConditionLoad()")
         print(ret)
-        
+
         #print("-------------event_loop_GetConditionLoad Start------------------")
         self.event_loop_GetConditionLoad = QEventLoop()
         self.event_loop_GetConditionLoad.exec_()
-        
+
         print(ret)
 
 

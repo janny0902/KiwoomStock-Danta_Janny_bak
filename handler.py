@@ -19,7 +19,7 @@ def on_receive_opt10080(kw: 'KiwoomAPI', rqname, trcode):
     ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
 
     for i in range(data_cnt):
-        
+
         date = kw.comm_get_data(trcode, "", rqname, i, "체결시간")
         open = kw.comm_get_data(trcode, "", rqname, i, "시가")
         high = kw.comm_get_data(trcode, "", rqname, i, "고가")

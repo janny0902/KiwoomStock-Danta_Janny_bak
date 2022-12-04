@@ -10,21 +10,21 @@ class MathAPI:
 
         #가격에 퍼센트 가격 구하기
     def percentMius(self,per,price):  # price * per  ex 1000-(1000 * 0.02) = 980   2%감소 계산
-        perc = per / 100    
+        perc = per / 100
         result = price - price * perc
         return result
 
         #등락률 구하기
-    def perPrice(self,price,nowprice):  #((price / nowprice) -1) * 100 
+    def perPrice(self,price,nowprice):  #((price / nowprice) -1) * 100
         result = ((nowprice / price)-1)*100
-        
+
         return result
 
-        #거래 호가 단위 구하기  
+        #거래 호가 단위 구하기
     def hogadan(self,price):
-        
+
         reulst = 0
-        
+
         if int(price) <= 999:
             result = 1
         elif int(price) <= 4999:
@@ -53,17 +53,17 @@ class MathAPI:
             # data.insert(0, "Date", data.index)
             # data.insert(1, "korean_name", row['korean_name'])
             # data.insert(2, "english_name", row['english_name'])
-           
 
-            
+
+
             arrOpen = np.asarray(data["open"], dtype='f8')
             arrHigh = np.asarray(data["high"], dtype='f8')
             arrLow = np.asarray(data["low"], dtype='f8')
             arrClose = np.asarray(data["close"], dtype='f8')
             arrVolume = np.asarray(data["volume"], dtype='f8')
-      
 
-            
+
+
             # 이동 평균 선
             data['SMA5'] = ta.SMA(arrClose, 5)
             data['SMA10'] = ta.SMA(arrClose, 10)
@@ -78,14 +78,14 @@ class MathAPI:
             data.insert(len(data.columns), "GAP_SMA60_SMA5", data['SMA60'] - data['SMA5'])
             data.insert(len(data.columns), "GAP_SMA120_SMA60", data['SMA120'] - data['SMA60'])
 
-            data['State_SMA5_trade'] = ['LOW' if s > 0 else 'HIGH' for s in data['GAP_SMA5_trade']] 
-            data['State_SMA10_SMA5'] = ['LOW' if s > 0 else 'HIGH' for s in data['GAP_SMA10_SMA5']] 
+            data['State_SMA5_trade'] = ['LOW' if s > 0 else 'HIGH' for s in data['GAP_SMA5_trade']]
+            data['State_SMA10_SMA5'] = ['LOW' if s > 0 else 'HIGH' for s in data['GAP_SMA10_SMA5']]
             data['State_SMA60_SMA5'] = ['LOW' if s > 0 else 'HIGH' for s in data['GAP_SMA60_SMA5']]
             data['State_SMA120_SMA60'] = ['LOW' if s > 0 else 'HIGH' for s in data['GAP_SMA120_SMA60']]
 
             # RSI
             data['RSI'] = ta.RSI(arrClose, 14)
-           
+
 
             # MACD Indecator
             # MACD가 0선을 상향돌파하면 매수(상승국면), 하향돌파하면 매도(하향국면)
@@ -111,7 +111,7 @@ class MathAPI:
             data.insert(len(data.columns), "MACD_OSCILLATOR_37", data['MACD_37'] - data['MACD_SIGNAL_37'])
 
             data['SAR'] = ta.SAR(arrHigh , arrLow, acceleration=0.01, maximum=0.2)
-            
+
 
             return data
 
@@ -119,9 +119,8 @@ class MathAPI:
             print(ex)
 
 
-    
-            
 
-    
-        
-    
+
+
+
+

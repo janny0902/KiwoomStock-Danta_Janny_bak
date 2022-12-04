@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 
 def on_receive_opt10080(kw: 'KiwoomAPI', rqname, trcode):
-   
+
 
     data_cnt = kw.get_repeat_cnt(trcode, rqname)
     ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
@@ -29,7 +29,7 @@ def on_receive_opt10080(kw: 'KiwoomAPI', rqname, trcode):
 
 
 def on_receive_opt10081(kw: 'KiwoomAPI', rqname, trcode):
-    
+
 
     data_cnt = kw.get_repeat_cnt(trcode, rqname)
     ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
